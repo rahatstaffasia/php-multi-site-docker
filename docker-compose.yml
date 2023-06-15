@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile
+    volumes:
+      - ./laravel:/var/www/html
+    networks:
+      - php_network
+
+  wordpress:
+    build:
+      context: ./wordpress
+      dockerfile: Dockerfile
+    volumes:
+      - ./wordpress:/var/www/html
+    networks:
+      - php_network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - php_network
+
+networks:
+  php_network:
