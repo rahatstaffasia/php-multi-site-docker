@@ -22,11 +22,41 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - 80:80
+      - "80:80"
+      - "443:443"
+      - "3030:3030"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
     networks:
       - php_network
+
+  phpunit:
+    image: binarydata/phpunit
+    depends_on:
+     - database
+     - redis
+    links:
+     - database:database
+     - redis:redis
+    volumes_from:
+     - data
+
+  database:
+    image: "mysql:${MYSQL_VERSION}"
+    env_file: "${MYSQL_ENV_FILE}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./machine/mysql/databases:/var/lib/mysql
+      - ./machine/mysql/cnf:/etc/mysql/conf.d
+  cache:
+    image: memcached
+    ports:
+      - "11211:11211"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
 
 networks:
   php_network:
