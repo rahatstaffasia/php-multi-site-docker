@@ -8,7 +8,8 @@ services:
     volumes:
       - ./laravel:/var/www/html
     networks:
-      - php_network
+      - backend
+      - frontend
 
   wordpress:
     build:
@@ -17,31 +18,36 @@ services:
     volumes:
       - ./wordpress:/var/www/html
     networks:
-      - php_network
+      - backend
 
   nginx:
-    image: nginx:latest
+    build:
+      context: ./services/nginx
+      args:
+        - CHANGE_SOURCE=${CHANGE_SOURCE}
+      dockerfile: Dockerfile    
     ports:
-      - "80:80"
-      - "443:443"
-      - "3030:3030"
+      - "${NGINX_HOST_HTTP_PORT}:80"
+      - "${NGINX_HOST_HTTPS_PORT}:443"
+      - "${VARNISH_BACKEND_PORT}:81"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      # - ./services/nginx/conf.d:/etc/nginx/conf.d
+      - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
     networks:
-      - php_network
+      - backend
 
-  phpunit:
-    image: binarydata/phpunit
-    depends_on:
-     - database
-     - redis
-    links:
-     - database:database
-     - redis:redis
-    volumes_from:
-     - data
+  # phpunit:
+  #   image: binarydata/phpunit
+  #   depends_on:
+  #   #  - mysql
+  #    - redis
+  #   links:
+  #    - database:database
+  #    - redis:redis
+  #   volumes_from:
+  #    - data
 
-  database:
+  mysql:
     image: "mysql:${MYSQL_VERSION}"
     env_file: "${MYSQL_ENV_FILE}"
     ports:
@@ -59,4 +65,5 @@ services:
       - "6379:6379"
 
 networks:
-  php_network:
+  backend:
+  frontend:
