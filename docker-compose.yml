@@ -3,20 +3,20 @@ version: '3'
 services:
   laravel:
     build:
-      context: ./laravel
+      context: ./sites/lara_store
       dockerfile: Dockerfile
     volumes:
-      - ./laravel:/var/www/html
+      - ./sites/lara_store:/var/www/html
     networks:
       - backend
       - frontend
 
   wordpress:
     build:
-      context: ./wordpress
+      context: ./sites/wordpress
       dockerfile: Dockerfile
     volumes:
-      - ./wordpress:/var/www/html
+      - ./sites/wordpress:/var/www/html
     networks:
       - backend
 
@@ -48,21 +48,24 @@ services:
   #    - data
 
   mysql:
-    image: "mysql:${MYSQL_VERSION}"
-    env_file: "${MYSQL_ENV_FILE}"
-    ports:
-      - "3306:3306"
+    build: 
+      context: ./services/mysql
+      dockerfile: Dockerfile
+      args:
+        - MYSQL_VERSION=${MYSQL_VERSION}
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${WORKSPACE_TIMEZONE}
     volumes:
-      - ./machine/mysql/databases:/var/lib/mysql
-      - ./machine/mysql/cnf:/etc/mysql/conf.d
-  cache:
-    image: memcached
+      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
+      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
     ports:
-      - "11211:11211"
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - backend
 
 networks:
   backend:
