@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/rahat/{last_name}/{id}', function (Request $request, $last_name, $id) {
+    dd($last_name, $id);
+});

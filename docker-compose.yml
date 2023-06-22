@@ -10,6 +10,18 @@ services:
     networks:
       - backend
       - frontend
+  
+  breeze_next:
+    build:
+      context: ./sites/breeze-next
+      dockerfile: Dockerfile
+    volumes:
+      - ./sites/breeze-next:/app
+    ports:
+      - 3000:3000
+    networks:
+      - backend
+      - frontend
 
   wordpress:
     build:
